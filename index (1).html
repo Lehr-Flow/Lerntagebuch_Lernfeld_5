@@ -1,0 +1,1267 @@
+<!--
+  =====================================================================
+  Selbstorganisiertes Lernen (SOL) - Lernfeld 5 "Einzelmöbel herstellen"
+  Tischler/Tischlerin - BBS Syke Europaschule
+  ---------------------------------------------------------------------
+  ANPASSEN AN IHRE SCHULE:
+  1) FARBEN: siehe :root unten (Variablen --primary, --accent ...).
+  2) LOGO: Suchen Sie weiter unten nach "LOGO-PLATZHALTER".
+     Ersetzen Sie den Text durch:  <img src="IHR-LOGO.png" alt="BBS Syke Europaschule">
+     (Datei daneben legen oder als Base64 einbetten.)
+  3) LEHRER-PASSWORT: siehe Konstante TEACHER_PASSWORT (JavaScript, ganz unten).
+  4) KLASSENGROESSE: im Lehrerbereich einstellbar (Standard 30, max. 30).
+
+  WICHTIGER HINWEIS ZUM DATENSCHUTZ / ZUR SICHERHEIT:
+  - Es werden ausschließlich Klassenlistennummern gespeichert, keine Namen.
+    Die Zuordnung Nummer -> Name führen Sie getrennt (Papier/Klassenbuch).
+  - Die Speicherung erfolgt im gemeinsamen Speicher der Anwendung. Das Lehrer-
+    Passwort schützt nur die Anzeige, nicht die Daten technisch. Diese Lösung
+    ist als pädagogisches Organisations- und Dokumentationswerkzeug gedacht,
+    nicht als rechtssichere Notenverwaltung. Verbindliche Noten führen Sie
+    bitte zusätzlich in Ihrem regulären System.
+  =====================================================================
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOL Lernfeld 5 - Tischler | BBS Syke Europaschule</title>
+
+<style>
+  :root{
+    /* ----- Hier Farben anpassen ----- */
+    --primary:#15506e;        /* Europablau (Kopf, Akzente) */
+    --primary-dark:#0f3a52;
+    --primary-soft:#e3edf3;
+    --accent:#b9772e;         /* warmer Eichenton (Tischlerhandwerk) */
+    --accent-soft:#f0e3d2;
+    --bg:#f6f4ef;
+    --surface:#ffffff;
+    --ink:#1f2933;
+    --muted:#5b6670;
+    --line:#e1ddd5;
+    /* Selbsteinschätzungs-Farben */
+    --r-sicher:#2f7d4f;
+    --r-weit:#7aa64a;
+    --r-lueck:#d99a2b;
+    --r-kaum:#c0563a;
+    --r-leer:#d7d2c8;
+    --shadow:0 2px 4px rgba(31,41,51,.06),0 8px 24px rgba(31,41,51,.06);
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{line-height:1.2;margin:0 0 .4em}
+  h1{font-size:1.5rem;letter-spacing:.3px}
+  h2{font-size:1.2rem;color:var(--primary-dark)}
+  h3{font-size:1rem}
+  p{margin:0 0 .7em}
+  a{color:var(--primary)}
+  small{color:var(--muted)}
+
+  /* ---------- Kopfbereich ---------- */
+  header.app{
+    background:linear-gradient(180deg,var(--primary),var(--primary-dark));
+    color:#fff;padding:14px 20px;display:flex;align-items:center;
+    justify-content:space-between;gap:16px;flex-wrap:wrap;
+    box-shadow:var(--shadow);position:sticky;top:0;z-index:20;
+  }
+  header.app .brand{display:flex;flex-direction:column}
+  header.app .brand .kicker{font-size:.72rem;letter-spacing:2px;text-transform:uppercase;opacity:.85}
+  header.app .brand .title{font-size:1.15rem;font-weight:700}
+  header.app .meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  header.app .datechip{
+    background:rgba(255,255,255,.14);padding:6px 12px;border-radius:999px;
+    font-size:.85rem;font-weight:600;white-space:nowrap;
+  }
+  /* LOGO-PLATZHALTER: hier Ihr <img> einsetzen */
+  .logo-box{
+    background:#fff;color:var(--primary-dark);border-radius:10px;
+    padding:8px 12px;font-weight:800;font-size:.78rem;line-height:1.1;
+    text-align:center;letter-spacing:.5px;min-width:118px;
+    border:2px solid var(--accent);
+  }
+  .logo-box span{display:block;color:var(--accent);font-size:.62rem;font-weight:700;letter-spacing:1px}
+
+  /* ---------- Layout ---------- */
+  main{max-width:1080px;margin:0 auto;padding:22px 18px 60px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;box-shadow:var(--shadow);margin-bottom:18px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}}
+
+  /* ---------- Buttons & Inputs ---------- */
+  button{font:inherit;cursor:pointer;border:none;border-radius:10px;padding:11px 18px;
+    font-weight:600;transition:.15s background,.15s transform}
+  button:active{transform:translateY(1px)}
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-primary:hover{background:var(--primary-dark)}
+  .btn-accent{background:var(--accent);color:#fff}
+  .btn-accent:hover{background:#9c621f}
+  .btn-ghost{background:var(--primary-soft);color:var(--primary-dark)}
+  .btn-ghost:hover{background:#d3e2eb}
+  .btn-soft{background:#eee9e0;color:var(--ink)}
+  input,select,textarea{font:inherit;padding:10px 12px;border:1px solid var(--line);
+    border-radius:10px;background:#fff;width:100%;color:var(--ink)}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--primary);outline-offset:1px;border-color:var(--primary)}
+  label{font-weight:600;font-size:.92rem;display:block;margin:0 0 5px}
+  .field{margin-bottom:14px}
+  textarea{min-height:70px;resize:vertical}
+
+  /* ---------- Tabs ---------- */
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+  .tabs button{background:#ece7de;color:var(--muted);border-radius:999px;padding:9px 16px;font-size:.9rem}
+  .tabs button.active{background:var(--primary);color:#fff}
+
+  /* ---------- Level-Badges ---------- */
+  /* ---------- Erklärtabellen (Level / Stufen) ---------- */
+  .info-table{width:100%;border-collapse:collapse;margin:8px 0 4px;font-size:.9rem}
+  .info-table th{background:var(--primary-soft);color:var(--primary-dark);text-align:left;
+    padding:8px 10px;border:1px solid var(--line);font-size:.85rem}
+  .info-table td{padding:8px 10px;border:1px solid var(--line);vertical-align:top}
+  .pill-rate{display:inline-block;color:#fff;font-weight:700;font-size:.8rem;
+    padding:3px 10px;border-radius:999px;white-space:nowrap}
+
+  .level-head{display:flex;align-items:center;gap:10px;margin:18px 0 8px}
+  .level-badge{font-weight:800;color:#fff;border-radius:8px;padding:4px 10px;font-size:.85rem}
+  .lv1{background:#6c9a3f}.lv2{background:var(--primary)}.lv3{background:var(--accent)}
+  .level-note{font-size:.85rem;color:var(--muted)}
+
+  /* ---------- Objective rows ---------- */
+  .obj{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:#fff}
+  .obj .obj-text{font-size:.95rem;margin-bottom:9px}
+  .obj .obj-id{color:var(--accent);font-weight:800;margin-right:6px}
+  .ratings{display:flex;gap:6px;flex-wrap:wrap}
+  .ratings button{padding:7px 12px;border-radius:8px;font-size:.82rem;background:#f1ede5;color:var(--muted);border:1px solid var(--line)}
+  .ratings button[data-state="sicher"].on{background:var(--r-sicher);color:#fff;border-color:transparent}
+  .ratings button[data-state="weit"].on{background:var(--r-weit);color:#fff;border-color:transparent}
+  .ratings button[data-state="lueck"].on{background:var(--r-lueck);color:#fff;border-color:transparent}
+  .ratings button[data-state="kaum"].on{background:var(--r-kaum);color:#fff;border-color:transparent}
+
+  /* ---------- Diagramm ---------- */
+  .bar-row{margin-bottom:9px}
+  .bar-label{font-size:.82rem;margin-bottom:3px;display:flex;justify-content:space-between;gap:8px}
+  .bar-label .id{color:var(--accent);font-weight:800}
+  .bar-track{display:flex;height:22px;border-radius:6px;overflow:hidden;background:var(--r-leer)}
+  .bar-seg{height:100%}
+  .seg-sicher{background:var(--r-sicher)}
+  .seg-weit{background:var(--r-weit)}
+  .seg-lueck{background:var(--r-lueck)}
+  .seg-kaum{background:var(--r-kaum)}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin:10px 0 18px;font-size:.82rem}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:13px;height:13px;border-radius:3px;display:inline-block}
+
+  /* ---------- Sterne / Arbeitsweise ---------- */
+  .stars{display:flex;gap:4px}
+  .stars button{font-size:1.5rem;background:none;padding:2px;color:#d7d2c8;line-height:1}
+  .stars button.on{color:var(--accent)}
+  .modepick{display:flex;gap:8px;flex-wrap:wrap}
+  .modepick button{background:#f1ede5;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:9px 14px;font-size:.88rem}
+  .modepick button.on{background:var(--accent);color:#fff;border-color:transparent}
+
+  /* ---------- Quiz ---------- */
+  .quiz-q{border-left:4px solid var(--primary);padding:4px 0 4px 14px;margin-bottom:16px}
+  .quiz-opt{display:block;background:#f7f4ee;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:6px 0;cursor:pointer}
+  .quiz-opt input{width:auto;margin-right:8px}
+  .quiz-opt.correct{background:#e6f2ea;border-color:var(--r-sicher)}
+  .quiz-opt.wrong{background:#f7e6e1;border-color:var(--r-kaum)}
+  .locked{opacity:.55;pointer-events:none}
+
+  /* ---------- Tabelle Lehrer ---------- */
+  table{width:100%;border-collapse:collapse;font-size:.88rem}
+  th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line)}
+  th{color:var(--primary-dark);font-size:.78rem;text-transform:uppercase;letter-spacing:.5px}
+  tr.clickable{cursor:pointer}
+  tr.clickable:hover{background:var(--primary-soft)}
+  .grade-pill{font-weight:800;border-radius:8px;padding:3px 10px;color:#fff;display:inline-block}
+
+  .notice{background:var(--accent-soft);border:1px solid #e3cda9;border-radius:12px;padding:12px 14px;font-size:.88rem;margin-bottom:16px}
+  .pill{display:inline-block;background:var(--primary-soft);color:var(--primary-dark);border-radius:999px;padding:3px 10px;font-size:.78rem;font-weight:700;margin:2px 4px 2px 0}
+  .hidden{display:none}
+  .saved-flash{color:var(--r-sicher);font-weight:700;font-size:.85rem}
+  .row-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .kpi{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+  .kpi .box{background:var(--primary-soft);border-radius:12px;padding:12px 16px;min-width:120px}
+  .kpi .box b{display:block;font-size:1.5rem;color:var(--primary-dark)}
+  .entry{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:#fdfcfa;font-size:.9rem}
+  .entry .date{font-weight:700;color:var(--primary-dark)}
+</style>
+
+<header class="app">
+  <div class="brand">
+    <span class="kicker">Lernfeld 5 &middot; Einzelmöbel herstellen</span>
+    <span class="title">Selbstorganisiertes Lernen &ndash; Tischler/in</span>
+  </div>
+  <div class="meta">
+    <span class="datechip" id="dateChip"></span>
+    <!-- LOGO-PLATZHALTER: dieses div durch <img src="..."> ersetzen -->
+    <div class="logo-box">BBS SYKE<span>EUROPASCHULE</span></div>
+  </div>
+</header>
+
+<main>
+  <!-- ============ STARTBILDSCHIRM ============ -->
+  <section id="screen-start">
+    <div class="card">
+      <h1>Willkommen</h1>
+      <p>Diese Plattform begleitet das Lernfeld 5 im selbstorganisierten Lernen. Du dokumentierst nach jedem Berufsschultag, woran du gearbeitet hast, schätzt dich selbst ein und reflektierst deinen Lernfortschritt.</p>
+      <div class="grid2" style="margin-top:14px">
+        <div class="card" style="margin:0">
+          <h2>Ich bin Schüler/in</h2>
+          <div class="field">
+            <label for="numIn">Deine Nummer aus der Klassenliste</label>
+            <input id="numIn" type="number" min="1" inputmode="numeric" placeholder="z. B. 7">
+          </div>
+          <button class="btn-primary" onclick="loginStudent()">Anmelden</button>
+          <p><small>Es wird nur deine Nummer gespeichert, kein Name.</small></p>
+        </div>
+        <div class="card" style="margin:0">
+          <h2>Lehrkraft</h2>
+          <div class="field">
+            <label for="pwIn">Passwort</label>
+            <input id="pwIn" type="password" placeholder="Lehrer-Passwort" onkeydown="if(event.key==='Enter')loginTeacher()">
+          </div>
+          <button class="btn-accent" onclick="loginTeacher()">Lehrerbereich öffnen</button>
+          <p id="pwError" style="color:var(--r-kaum);font-weight:600;font-size:.85rem"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCHUELERBEREICH ============ -->
+  <section id="screen-student" class="hidden">
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div><h1 style="margin:0">Schüler/in Nr. <span id="sNum"></span></h1>
+        <small id="sStatus"></small></div>
+      <button class="btn-soft" onclick="logout()">Abmelden</button>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0">Meine Daten</h2>
+      <p><small>Deine Einträge bleiben auf diesem Gerät gespeichert und sind bei jeder Anmeldung wieder da. Damit deine Lehrkraft sie sieht, speicherst du sie am Ende der Stunde als Datei. Auf dem Handy kannst du sie über den Teilen-Dialog gleich in die Schul-Cloud legen, sonst wird sie heruntergeladen.</small></p>
+      <div class="row-actions">
+        <button class="btn-primary" onclick="exportStudent()">Meine Daten für die Lehrkraft speichern</button>
+      </div>
+      <hr style="margin:18px 0;border:none;border-top:1px solid var(--line)">
+      <h3 style="margin:0 0 6px">Sicherung wieder laden</h3>
+      <p><small>Falls deine Einträge einmal fehlen sollten, kannst du hier deine zuletzt gespeicherte Datei wieder einlesen.</small></p>
+      <div class="grid2" style="align-items:end">
+        <div class="field">
+          <label for="importOwnFile">Deine Sicherungsdatei (.json)</label>
+          <input id="importOwnFile" type="file" accept=".json,application/json">
+        </div>
+        <div class="field">
+          <button class="btn-soft" onclick="importOwnBackup()">Sicherung laden</button>
+        </div>
+      </div>
+      <span id="ownImportMsg" class="saved-flash"></span>
+    </div>
+
+    <div class="tabs">
+      <button class="active" data-tab="raster" onclick="sTab('raster')">Selbsteinschätzung</button>
+      <button data-tab="doku" onclick="sTab('doku')">Tagesdokumentation</button>
+      <button data-tab="quiz" onclick="sTab('quiz')">Wissensabfrage</button>
+      <button data-tab="klasse" onclick="sTab('klasse')">Klassenfortschritt</button>
+    </div>
+
+    <div id="tab-raster" class="tab-panel">
+      <div class="card">
+        <h2>Kompetenzraster &ndash; so schätze ich mich ein</h2>
+        <p><small>Klicke pro Aussage an, wie sicher du dich fühlst. Du kannst das jederzeit aktualisieren.</small></p>
+
+        <h3 style="margin-top:14px">Leveleinteilung</h3>
+        <p><small>Die Lernziele sind in drei aufeinander aufbauenden Leveln geordnet. Jedes Level steht für ein höheres Anforderungsniveau und bildet zugleich die Grundlage für eine Notenstufe.</small></p>
+        <table class="info-table">
+          <thead><tr><th>Level</th><th>Anforderungsniveau</th><th>Bedeutung für die Note</th></tr></thead>
+          <tbody>
+            <tr><td><b>Level 1</b></td><td>Grundlagen: benennen, beschreiben, erklären</td><td>Wer Level 1 sicher beherrscht, erreicht die Note 3.</td></tr>
+            <tr><td><b>Level 2</b></td><td>Anwenden: auswählen, begründen, vergleichen</td><td>Zusätzlich zu Level 1 sicher: Note 2.</td></tr>
+            <tr><td><b>Level 3</b></td><td>Analysieren und bewerten: entwickeln, beurteilen, reflektieren</td><td>Alle drei Level sicher: Note 1.</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:18px">Selbsteinschätzung: die vier Stufen</h3>
+        <table class="info-table">
+          <thead><tr><th>Stufe</th><th>Das heißt</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill-rate" style="background:var(--r-sicher)">sicher</span></td><td>Ich beherrsche das Lernziel sicher und selbstständig.</td></tr>
+            <tr><td><span class="pill-rate" style="background:var(--r-weit)">weitestgehend</span></td><td>Ich kann es überwiegend, habe aber noch kleine Unsicherheiten.</td></tr>
+            <tr><td><span class="pill-rate" style="background:var(--r-lueck)">lückenhaft</span></td><td>Ich kann es teilweise, es bestehen noch größere Lücken.</td></tr>
+            <tr><td><span class="pill-rate" style="background:var(--r-kaum)">kaum</span></td><td>Ich kann es noch kaum und benötige weitere Übung.</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:18px">Kompetenzraster &ndash; &bdquo;Ich kann &hellip;&ldquo;</h3>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--r-sicher)"></i>sicher</span>
+          <span><i class="dot" style="background:var(--r-weit)"></i>weitestgehend</span>
+          <span><i class="dot" style="background:var(--r-lueck)"></i>lückenhaft</span>
+          <span><i class="dot" style="background:var(--r-kaum)"></i>kaum</span>
+        </div>
+        <div id="rasterList"></div>
+        <p style="margin-top:16px"><small>Fachliche Grundlage: Fachkunde Holztechnik (Europa-Lehrmittel, ISBN 978-3-7585-4198-8) sowie KMK-Rahmenlehrplan Tischler/Tischlerin (2006), Lernfeld 5 &bdquo;Einzelmöbel herstellen&ldquo;. Die Selbsteinschätzung ist ein Lern- und Reflexionsinstrument; die verbindliche Note legt die Lehrkraft fest.</small></p>
+      </div>
+    </div>
+
+    <div id="tab-doku" class="tab-panel hidden">
+      <div class="card">
+        <h2>Tagesdokumentation</h2>
+        <p><small>Halte nach jedem Berufsschultag fest, welche Lernziele du bearbeitet hast und wie es lief.</small></p>
+        <div class="field">
+          <label for="dDate">Datum des Berufsschultags</label>
+          <input id="dDate" type="date">
+        </div>
+        <div class="field">
+          <label>Daran habe ich heute gearbeitet (Lernziele auswählen)</label>
+          <div id="dObjectives"></div>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label>So habe ich gearbeitet</label>
+            <div class="modepick" id="dMode">
+              <button type="button" data-mode="motiviert">motiviert</button>
+              <button type="button" data-mode="ausdauernd">ausdauernd</button>
+              <button type="button" data-mode="sorgfaeltig">sorgfältig</button>
+              <button type="button" data-mode="bemueht">bemüht</button>
+              <button type="button" data-mode="unmotiviert">unmotiviert</button>
+              <button type="button" data-mode="abgelenkt">abgelenkt</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>So zufrieden bin ich mit meiner Leistung</label>
+            <div class="stars" id="dStars">
+              <button type="button" data-v="1">&#9733;</button>
+              <button type="button" data-v="2">&#9733;</button>
+              <button type="button" data-v="3">&#9733;</button>
+              <button type="button" data-v="4">&#9733;</button>
+              <button type="button" data-v="5">&#9733;</button>
+            </div>
+          </div>
+        </div>
+        <div class="field"><label for="dGot">Das habe ich heute verstanden</label><textarea id="dGot"></textarea></div>
+        <div class="field"><label for="dUnclear">Das ist mir noch nicht klar geworden</label><textarea id="dUnclear"></textarea></div>
+        <div class="field"><label for="dBetter">Das will ich nächste Stunde besser machen</label><textarea id="dBetter"></textarea></div>
+        <button class="btn-primary" onclick="saveEntry()">Eintrag speichern</button>
+        <span id="entrySaved" class="saved-flash"></span>
+        <h3 style="margin-top:22px">Meine bisherigen Einträge</h3>
+        <div id="entryList"></div>
+      </div>
+    </div>
+
+    <div id="tab-quiz" class="tab-panel hidden">
+      <div class="card" id="extQuizCard">
+        <h2>Wissensabfrage</h2>
+        <p><small>Über die Links kommst du zu den Übungen und Quizzen. Du kannst jede Übung so oft wiederholen, wie du möchtest, um dich zu verbessern. Deine Bewertung trägt die Lehrkraft ein; hier siehst du dein aktuelles Ergebnis.</small></p>
+        <div id="extQuizArea"></div>
+      </div>
+    </div>
+
+    <div id="tab-klasse" class="tab-panel hidden">
+      <div class="card">
+        <h2>Kompetenzraster der Klasse</h2>
+        <p><small>So weit ist die ganze Klasse. Jeder Balken zeigt, wie viele Mitschüler sich bei einem Lernziel bereits sicher fühlen.</small></p>
+        <div class="legend">
+          <span><i class="dot seg-sicher" style="display:inline-block"></i>sicher</span>
+          <span><i class="dot seg-weit" style="display:inline-block"></i>weitestgehend</span>
+          <span><i class="dot seg-lueck" style="display:inline-block"></i>lückenhaft</span>
+          <span><i class="dot seg-kaum" style="display:inline-block"></i>kaum</span>
+        </div>
+        <div id="classChartStudent"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LEHRERBEREICH ============ -->
+  <section id="screen-teacher" class="hidden">
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <h1 style="margin:0">Lehrerbereich</h1>
+      <div class="row-actions">
+        <button class="btn-ghost" onclick="window.print()">Drucken / als PDF</button>
+        <button class="btn-soft" onclick="logout()">Abmelden</button>
+      </div>
+    </div>
+
+    <div class="notice">
+      Diese Auswertung ist ein <b>Notenvorschlag</b> auf Basis von Lernfortschritt, Wissensabfragen und Dokumentation. Die verbindliche Note legen Sie fest.
+    </div>
+
+    <div class="tabs">
+      <button class="active" data-ttab="über" onclick="tTab('über')">Klassenübersicht</button>
+      <button data-ttab="raster" onclick="tTab('raster')">Kompetenzraster (Diagramm)</button>
+      <button data-ttab="quizkat" onclick="tTab('quizkat')">Quiz-Katalog</button>
+      <button data-ttab="einstell" onclick="tTab('einstell')">Einstellungen</button>
+    </div>
+
+    <div id="ttab-über" class="ttab-panel">
+      <div class="card">
+        <h2 style="margin-top:0">Schülerdaten importieren</h2>
+        <p><small>Sammeln Sie die JSON-Dateien ein, die die Schüler/innen abgegeben haben, und lesen Sie sie hier gemeinsam ein. Der Klassenüberblick baut sich anschließend auf. Eine neuere Datei ersetzt eine ältere derselben Nummer. Ein gesammeltes ZIP-Archiv aus itslearning können Sie direkt hineinziehen; die enthaltenen JSON-Dateien werden automatisch herausgelesen.</small></p>
+        <div class="grid2" style="align-items:end">
+          <div class="field">
+            <label for="importStudentsFile">Schülerdateien (.json oder .zip, Mehrfachauswahl möglich)</label>
+            <input id="importStudentsFile" type="file" accept=".json,application/json,.zip,application/zip,application/x-zip-compressed" multiple>
+          </div>
+          <div class="field">
+            <button class="btn-primary" onclick="importStudents()">Dateien importieren</button>
+          </div>
+        </div>
+        <span id="teacherImportMsg" class="saved-flash"></span>
+      </div>
+      <div class="card">
+        <h2>Uebersicht</h2>
+        <div class="kpi" id="teacherKpi"></div>
+        <div style="overflow-x:auto">
+          <table id="teacherTable"></table>
+        </div>
+        <p><small>Zeile anklicken für Details zum einzelnen Schüler.</small></p>
+      </div>
+      <div id="studentDetail" class="card hidden"></div>
+    </div>
+
+    <div id="ttab-raster" class="ttab-panel hidden">
+      <div class="card">
+        <h2>Erreichte Lernziele im Kompetenzraster</h2>
+        <div class="legend">
+          <span><i class="dot seg-sicher" style="display:inline-block"></i>sicher</span>
+          <span><i class="dot seg-weit" style="display:inline-block"></i>weitestgehend</span>
+          <span><i class="dot seg-lueck" style="display:inline-block"></i>lückenhaft</span>
+          <span><i class="dot seg-kaum" style="display:inline-block"></i>kaum</span>
+        </div>
+        <div id="classChartTeacher"></div>
+      </div>
+    </div>
+
+    <div id="ttab-quizkat" class="ttab-panel hidden">
+      <div class="card">
+        <h2>Quiz-Katalog verwalten</h2>
+        <p><small>Hier hinterlegen Sie Links zu externen Quizzen (z. B. LearningApps, H5P, Kahoot). Die Links erscheinen im Schülerbereich unter &bdquo;Wissensabfrage&ldquo;. Die erreichten Ergebnisse tragen Sie später je Schüler/in in der Klassenübersicht ein; sie fließen in den Notenvorschlag ein.</small></p>
+        <div class="grid2" style="align-items:end">
+          <div class="field">
+            <label for="nqTitle">Bezeichnung</label>
+            <input id="nqTitle" type="text" placeholder="z. B. Möbelbauarten (LearningApps)">
+          </div>
+          <div class="field">
+            <label for="nqUrl">Link (https://...)</label>
+            <input id="nqUrl" type="url" placeholder="https://learningapps.org/...">
+          </div>
+        </div>
+        <div class="field" style="max-width:280px">
+          <label for="nqMax">Höchstpunktzahl (für reine Prozentangabe 100)</label>
+          <input id="nqMax" type="number" min="1" step="1" value="100">
+        </div>
+        <button class="btn-primary" onclick="addExtQuiz()">Quiz hinzufügen</button>
+        <span id="quizKatSaved" class="saved-flash"></span>
+
+        <hr style="margin:22px 0;border:none;border-top:1px solid var(--line)">
+        <h3 style="margin:0 0 6px">Eigenes Quiz als Datei hochladen</h3>
+        <p><small>Sie können ein fertiges, in sich geschlossenes HTML-Quiz (eine einzelne .html-Datei, z. B. das Möbelbauweisen-Quiz) direkt hochladen. Es wird im Werkzeug gespeichert und öffnet sich für die Schüler/innen in einem neuen Tab, ganz ohne externen Link. Die erreichten Ergebnisse tragen Sie wie gewohnt je Schüler/in in der Klassenübersicht ein.</small></p>
+        <div class="grid2" style="align-items:end">
+          <div class="field">
+            <label for="uqTitle">Bezeichnung</label>
+            <input id="uqTitle" type="text" placeholder="z. B. Möbelbauweisen (Zuordnung)">
+          </div>
+          <div class="field">
+            <label for="uqFile">Quiz-Datei (.html)</label>
+            <input id="uqFile" type="file" accept=".html,.htm,text/html">
+          </div>
+        </div>
+        <div class="field" style="max-width:280px">
+          <label for="uqMax">Höchstpunktzahl (für reine Prozentangabe 100)</label>
+          <input id="uqMax" type="number" min="1" step="1" value="100">
+        </div>
+        <button class="btn-primary" onclick="uploadExtQuiz()">Hochladen und integrieren</button>
+        <span id="quizUpSaved" class="saved-flash"></span>
+
+        <hr style="margin:22px 0;border:none;border-top:1px solid var(--line)">
+        <div id="quizKatList"></div>
+      </div>
+    </div>
+
+    <div id="ttab-einstell" class="ttab-panel hidden">
+      <div class="card">
+        <h2>Einstellungen</h2>
+        <div class="field" style="max-width:340px">
+          <label for="classSize">Klassengröße (gültige Login-Nummern 1 bis ...)</label>
+          <input id="classSize" type="number" min="1" max="30">
+          <small>Legt fest, welche Nummern sich anmelden dürfen. Ruhig höher wählen, um die Seite über mehrere Jahrgänge zu nutzen.</small>
+        </div>
+        <div class="field" style="max-width:340px">
+          <label for="refSize">Bezugsgröße Klassenfortschritt (tatsächliche Schülerzahl)</label>
+          <input id="refSize" type="number" min="1" max="30">
+          <small>Grundlage für die Prozentangaben im Klassenfortschritt. Auf die Zahl der Schüler/innen dieses Jahrgangs setzen.</small>
+        </div>
+        <button class="btn-primary" onclick="saveSettings()">Speichern</button>
+        <span id="sizeSaved" class="saved-flash"></span>
+        <hr style="margin:22px 0;border:none;border-top:1px solid var(--line)">
+        <h3>Daten zurücksetzen</h3>
+        <p><small>Löscht alle Schülerdaten dauerhaft. Nur am Ende des Lernfeldes verwenden.</small></p>
+        <button class="btn-soft" onclick="resetAll()">Alle Daten löschen</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+/* =====================================================================
+   LERNZIELE  (SMART, "Ich kann ...", in drei Leveln)
+   Level 1 = Grundlage (Note 3), Level 2 = Aufbauend (Note 2), Level 3 = Vertiefend (Note 1)
+   ===================================================================== */
+const OBJECTIVES = [
+  // ---- Level 1 ----
+  {id:"1.1",lv:1,t:"Ich kann die Anforderungen aus einem Kundenauftrag für ein Einzelmöbel erfassen und auflisten."},
+  {id:"1.2",lv:1,t:"Ich kann verschiedene Möbelbauarten benennen und unterscheiden."},
+  {id:"1.3",lv:1,t:"Ich kann verschiedene Anschlagarten von Türen benennen."},
+  {id:"1.4",lv:1,t:"Ich kann den Aufbau eines Schubkastens beschreiben und seine Einzelteile benennen."},
+  {id:"1.5",lv:1,t:"Ich kann Schmalflächen- und Breitflächenbeschichtung unterscheiden."},
+  {id:"1.6",lv:1,t:"Ich kann erklären, was ein Furnier ist, und Furnierarten benennen."},
+  {id:"1.7",lv:1,t:"Ich kann gebräuchliche Klebstoffe des Tischlerhandwerks benennen."},
+  {id:"1.8",lv:1,t:"Ich kann Schleifmittel nach ihrer Körnung ordnen und die Reihenfolge beim Schleifen angeben."},
+  {id:"1.9",lv:1,t:"Ich kann Reststoffe der Werkstatt unterscheiden und die getrennte Entsorgung erklären."},
+  {id:"1.10",lv:1,t:"Ich kann Verfahren zur Oberflächenbehandlung benennen."},
+
+  // ---- Level 2 ----
+  {id:"2.1",lv:2,t:"Ich kann aus einem Kundenauftrag Gestaltungsvarianten für ein Einzelmöbel entwickeln und skizzieren."},
+  {id:"2.2",lv:2,t:"Ich kann für ein Möbel eine geeignete Möbelbauart auswählen und begründen."},
+  {id:"2.3",lv:2,t:"Ich kann für bewegliche Möbelteile passende Beschläge auswählen und begründen."},
+  {id:"2.4",lv:2,t:"Ich kann für eine Tür eine Anschlagart festlegen und ihre Auswirkung auf Fugenbild und Funktion erläutern."},
+  {id:"2.5",lv:2,t:"Ich kann Schubkastensysteme vergleichen und für einen Anwendungsfall auswählen."},
+  {id:"2.6",lv:2,t:"Ich kann den Ablauf der Furnierverarbeitung in der richtigen Reihenfolge beschreiben."},
+  {id:"2.7",lv:2,t:"Ich kann für eine Verklebung einen geeigneten Klebstoff auswählen und die Verarbeitungsbedingungen berücksichtigen."},
+  {id:"2.8",lv:2,t:"Ich kann für eine Oberfläche einen Schleifplan mit sinnvoller Körnungsfolge erstellen."},
+  {id:"2.9",lv:2,t:"Ich kann für eine bestimmte Beanspruchung ein geeignetes Oberflächenschutzsystem auswählen und begründen."},
+  {id:"2.10",lv:2,t:"Ich kann geeignete Mess- und Prüfverfahren zur Qualitätssicherung auswählen und anwenden."},
+
+  // ---- Level 3 ----
+  {id:"3.1",lv:3,t:"Ich kann Gestaltungsvarianten anhand ästhetischer, funktionaler und konstruktiver Kriterien bewerten und meine Auswahl begründen."},
+  {id:"3.2",lv:3,t:"Ich kann eine konstruktive Lösung unter Berücksichtigung von Holzfeuchte und Holzbewegung entwickeln und begründen."},
+  {id:"3.3",lv:3,t:"Ich kann vollständige Fertigungsunterlagen für ein Einzelmöbel erstellen."},
+  {id:"3.4",lv:3,t:"Ich kann Konstruktions- und Materialvarianten hinsichtlich Wirtschaftlichkeit vergleichen und eine begründete Empfehlung geben."},
+  {id:"3.5",lv:3,t:"Ich kann Fehler in der Furnier-, Klebe- und Oberflächentechnik analysieren und Maßnahmen zur Vermeidung ableiten."},
+  {id:"3.6",lv:3,t:"Ich kann ein Qualitätssicherungskonzept für die Fertigung eines Einzelmöbels entwerfen."},
+  {id:"3.7",lv:3,t:"Ich kann mein fertiges Produkt fachgerecht präsentieren und meine Entscheidungen begründen."},
+  {id:"3.8",lv:3,t:"Ich kann den Entwurfs-, Planungs- und Herstellungsprozess reflektieren und Verbesserungen ableiten."}
+];
+
+/* =====================================================================
+   WISSENSABFRAGEN  (eine je Level, je 5 Fragen, bestanden ab 60 %)
+   ===================================================================== */
+/* =====================================================================
+   EXTERNE QUIZZE / WISSENSABFRAGE
+   Die Liste der Quizze wird im Lehrerbereich (Reiter "Quiz-Katalog")
+   gepflegt und global gespeichert (Schlüssel "ext_quiz_list").
+   Jeder Eintrag: { id, title, url, max }.
+   ===================================================================== */
+let extQuizList = [];
+let _blobUrls = [];   // laufende Objekt-URLs hochgeladener Quizze, werden bei Neuaufbau freigegeben
+async function loadExtQuizList(){
+  _blobUrls.forEach(u=>{try{URL.revokeObjectURL(u);}catch(e){}});
+  _blobUrls = [];
+  extQuizList = (await sGet("ext_quiz_list")) || [];
+  for(const eq of extQuizList){
+    if(eq.type==="upload"){
+      eq._blobUrl = null;
+      try{
+        const html = await sGet("ext_quiz_html_"+eq.id);
+        if(html){
+          const blob = new Blob([html],{type:"text/html"});
+          eq._blobUrl = URL.createObjectURL(blob);
+          _blobUrls.push(eq._blobUrl);
+        }
+      }catch(e){/* Datei nicht vorhanden */}
+    }
+  }
+}
+function readFileText(file){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>resolve(r.result);
+    r.onerror=()=>reject(new Error("Datei konnte nicht gelesen werden."));
+    r.readAsText(file,"UTF-8");
+  });
+}
+
+const RATINGS = [
+  {key:"sicher",label:"sicher",val:1.0},
+  {key:"weit",label:"weitestgehend",val:0.75},
+  {key:"lueck",label:"lückenhaft",val:0.4},
+  {key:"kaum",label:"kaum",val:0.1}
+];
+
+/* ===== Konfiguration ===== */
+const TEACHER_PASSWORT = "tischler26";   // <-- hier ändern
+const QUIZ_PASS = 0.6;
+const DEFAULT_CLASS_SIZE = 30;
+
+/* =====================================================================
+   SPEICHER-ABSTRAKTION (localStorage mit In-Memory-Fallback)
+   ===================================================================== */
+const NS = "sol_lf5_"; // Namensraum, verhindert Kollisionen mit anderen Seiten
+const mem = {};        // Notfall-Speicher, nur innerhalb der Sitzung gueltig
+
+// Pruefen, ob localStorage tatsaechlich nutzbar ist (kann in manchen
+// Umgebungen blockiert sein, z. B. privater Modus).
+let hasLS = false;
+try{
+  const t = "__sol_test__";
+  window.localStorage.setItem(t, "1");
+  window.localStorage.removeItem(t);
+  hasLS = true;
+}catch(e){ hasLS = false; }
+
+async function sGet(key){
+  if(hasLS){
+    try{
+      const raw = window.localStorage.getItem(NS+key);
+      if(raw!==null) return JSON.parse(raw);
+    }catch(e){/* faellt unten auf mem zurueck */}
+  }
+  return (key in mem) ? mem[key] : null;
+}
+async function sSet(key,value){
+  mem[key]=value; // Spiegel im Arbeitsspeicher
+  if(hasLS){
+    try{ window.localStorage.setItem(NS+key, JSON.stringify(value)); }
+    catch(e){ console.warn("Speichern im localStorage fehlgeschlagen",e); }
+  }
+}
+async function sDel(key){
+  delete mem[key];
+  if(hasLS){ try{ window.localStorage.removeItem(NS+key); }catch(e){} }
+}
+async function sList(prefix){
+  if(hasLS){
+    try{
+      const out=[];
+      for(let i=0;i<window.localStorage.length;i++){
+        const k = window.localStorage.key(i);
+        if(k && k.indexOf(NS+prefix)===0) out.push(k.slice(NS.length));
+      }
+      return out;
+    }catch(e){/* faellt unten auf mem zurueck */}
+  }
+  return Object.keys(mem).filter(k=>k.startsWith(prefix));
+}
+
+/* ===== Hilfsfunktionen ===== */
+function $(id){return document.getElementById(id);}
+function todayISO(){const d=new Date();return d.toISOString().slice(0,10);}
+function fmtDate(iso){if(!iso)return"";const [y,m,d]=iso.split("-");return `${d}.${m}.${y}`;}
+function blankStudent(num){return{num:num,self:{},entries:[],quizzes:{},extQuizzes:{}};}
+
+/* ===== Kopf-Datum ===== */
+$("dateChip").textContent = new Date().toLocaleDateString("de-DE",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
+
+/* ===== State ===== */
+let current = null;      // aktueller Schüler (Objekt)
+let classSize = DEFAULT_CLASS_SIZE;
+let refSize   = DEFAULT_CLASS_SIZE;  // Bezugsgroesse fuer den Klassenfortschritt
+
+/* =====================================================================
+   LOGIN / NAVIGATION
+   ===================================================================== */
+async function loadConfig(){
+  const c = await sGet("class_config");
+  classSize = (c && c.size) ? c.size : DEFAULT_CLASS_SIZE;
+  refSize   = (c && c.refSize) ? c.refSize : classSize;
+}
+
+async function loginStudent(){
+  await loadConfig();
+  const n = parseInt($("numIn").value,10);
+  if(!n || n<1){alert("Bitte gib deine Nummer aus der Klassenliste ein.");return;}
+  if(n>classSize){alert("Diese Nummer ist größer als die eingestellte Klassengröße ("+classSize+"). Bitte bei der Lehrkraft melden.");return;}
+  const key="student_"+n;
+  let data = await sGet(key);
+  if(!data){ data = blankStudent(n); await sSet(key,data); }
+  current = data;
+  if(!current.extQuizzes) current.extQuizzes={};
+  await loadExtQuizList();
+  $("screen-start").classList.add("hidden");
+  $("screen-teacher").classList.add("hidden");
+  $("screen-student").classList.remove("hidden");
+  $("sNum").textContent = n;
+  renderStudent();
+}
+
+function loginTeacher(){
+  const pw = $("pwIn").value;
+  if(pw!==TEACHER_PASSWORT){$("pwError").textContent="Passwort nicht korrekt.";return;}
+  $("pwError").textContent="";
+  $("pwIn").value="";
+  $("screen-start").classList.add("hidden");
+  $("screen-student").classList.add("hidden");
+  $("screen-teacher").classList.remove("hidden");
+  loadConfig().then(()=>{ $("classSize").value=classSize; $("refSize").value=refSize; renderTeacher(); });
+}
+
+function logout(){
+  current=null;
+  $("screen-student").classList.add("hidden");
+  $("screen-teacher").classList.add("hidden");
+  $("screen-start").classList.remove("hidden");
+  $("numIn").value="";
+}
+
+/* =====================================================================
+   SCHUELER: TABS
+   ===================================================================== */
+function sTab(name){
+  document.querySelectorAll("#screen-student .tabs button").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
+  ["raster","doku","quiz","klasse"].forEach(t=>$("tab-"+t).classList.toggle("hidden",t!==name));
+  if(name==="klasse") renderClassChart("classChartStudent");
+  if(name==="quiz"){ renderStudentQuizzes(); }
+}
+
+/* ===== Selbsteinschätzung ===== */
+function renderStudent(){
+  updateStudentStatus();
+  renderRaster();
+  renderDokuObjectives();
+  $("dDate").value = todayISO();
+  renderEntries();
+  renderStudentQuizzes();
+}
+
+function updateStudentStatus(){
+  const lvl = highestLevel(current);
+  const txt = lvl===0 ? "Noch kein Level abgeschlossen" : ("Höchstes abgeschlossenes Level: "+lvl);
+  $("sStatus").textContent = txt;
+}
+
+function renderRaster(){
+  const host=$("rasterList");host.innerHTML="";
+  [1,2,3].forEach(lv=>{
+    const head=document.createElement("div");head.className="level-head";
+    head.innerHTML=`<span class="level-badge lv${lv}">Level ${lv}</span>
+      <span class="level-note">${lv===1?"Grundlage &ndash; Voraussetzung für Note 3":lv===2?"Aufbauend &ndash; für Note 2":"Vertiefend &ndash; für Note 1"}</span>`;
+    host.appendChild(head);
+    OBJECTIVES.filter(o=>o.lv===lv).forEach(o=>{
+      const row=document.createElement("div");row.className="obj";
+      const sel=current.self[o.id]||"";
+      let btns="";
+      RATINGS.forEach(r=>{btns+=`<button data-state="${r.key}" class="${sel===r.key?'on':''}" onclick="setRating('${o.id}','${r.key}',this)">${r.label}</button>`;});
+      row.innerHTML=`<div class="obj-text"><span class="obj-id">${o.id}</span>${o.t}</div><div class="ratings">${btns}</div>`;
+      host.appendChild(row);
+    });
+  });
+}
+
+async function setRating(id,state,btn){
+  current.self[id]=state;
+  const group=btn.parentElement;
+  group.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b===btn));
+  await sSet("student_"+current.num,current);
+  updateStudentStatus();
+}
+
+/* ===== Tagesdokumentation ===== */
+let dModes=[],dStars=0;
+const MODE_LABELS={motiviert:"motiviert",ausdauernd:"ausdauernd",sorgfaeltig:"sorgfältig",bemueht:"bemüht",unmotiviert:"unmotiviert",abgelenkt:"abgelenkt"};
+const MODE_CONFLICTS={motiviert:"unmotiviert",unmotiviert:"motiviert",ausdauernd:"abgelenkt",abgelenkt:"ausdauernd"};
+function renderDokuObjectives(){
+  const host=$("dObjectives");host.innerHTML="";
+  [1,2,3].forEach(lv=>{
+    const h=document.createElement("div");h.className="level-head";
+    h.innerHTML=`<span class="level-badge lv${lv}">Level ${lv}</span>`;
+    host.appendChild(h);
+    OBJECTIVES.filter(o=>o.lv===lv).forEach(o=>{
+      const w=document.createElement("label");
+      w.style.cssText="display:flex;gap:8px;align-items:flex-start;font-weight:400;font-size:.9rem;margin:4px 0";
+      w.innerHTML=`<input type="checkbox" style="width:auto;margin-top:3px" value="${o.id}"><span><b style="color:var(--accent)">${o.id}</b> ${o.t}</span>`;
+      host.appendChild(w);
+    });
+  });
+  document.querySelectorAll("#dMode button").forEach(b=>b.onclick=()=>{
+    const m=b.dataset.mode;
+    if(dModes.includes(m)){dModes=dModes.filter(x=>x!==m);}
+    else{dModes.push(m);const opp=MODE_CONFLICTS[m];if(opp){dModes=dModes.filter(x=>x!==opp);}}
+    document.querySelectorAll("#dMode button").forEach(x=>x.classList.toggle("on",dModes.includes(x.dataset.mode)));});
+  document.querySelectorAll("#dStars button").forEach(b=>b.onclick=()=>{
+    dStars=parseInt(b.dataset.v,10);
+    document.querySelectorAll("#dStars button").forEach(x=>x.classList.toggle("on",parseInt(x.dataset.v,10)<=dStars));});
+}
+
+async function saveEntry(){
+  const objs=[...document.querySelectorAll("#dObjectives input:checked")].map(c=>c.value);
+  const entry={
+    date:$("dDate").value||todayISO(),
+    objs:objs,
+    mode:dModes.map(k=>MODE_LABELS[k]||k).join(", "),
+    stars:dStars,
+    got:$("dGot").value.trim(),
+    unclear:$("dUnclear").value.trim(),
+    better:$("dBetter").value.trim(),
+    ts:Date.now()
+  };
+  if(objs.length===0 && !entry.got && !entry.unclear && !entry.better){
+    alert("Bitte mindestens ein Lernziel auswählen oder etwas in die Reflexion schreiben.");return;
+  }
+  current.entries.push(entry);
+  await sSet("student_"+current.num,current);
+  // Formular zurücksetzen
+  document.querySelectorAll("#dObjectives input:checked").forEach(c=>c.checked=false);
+  $("dGot").value="";$("dUnclear").value="";$("dBetter").value="";
+  dModes=[];dStars=0;
+  document.querySelectorAll("#dMode button").forEach(x=>x.classList.remove("on"));
+  document.querySelectorAll("#dStars button").forEach(x=>x.classList.remove("on"));
+  $("entrySaved").textContent="Eintrag gespeichert.";
+  setTimeout(()=>$("entrySaved").textContent="",2500);
+  renderEntries();
+}
+
+function renderEntries(){
+  const host=$("entryList");host.innerHTML="";
+  if(current.entries.length===0){host.innerHTML="<p><small>Noch keine Einträge.</small></p>";return;}
+  [...current.entries].reverse().forEach(e=>{
+    const div=document.createElement("div");div.className="entry";
+    const ids=e.objs&&e.objs.length?e.objs.map(i=>`<span class="pill">${i}</span>`).join(""):"<small>kein Lernziel markiert</small>";
+    div.innerHTML=`<div class="date">${fmtDate(e.date)} &middot; ${"\u2605".repeat(e.stars||0)}${e.mode?" &middot; "+e.mode:""}</div>
+      <div style="margin:6px 0">${ids}</div>
+      ${e.got?`<div><b>Verstanden:</b> ${escapeHtml(e.got)}</div>`:""}
+      ${e.unclear?`<div><b>Noch unklar:</b> ${escapeHtml(e.unclear)}</div>`:""}
+      ${e.better?`<div><b>Besser machen:</b> ${escapeHtml(e.better)}</div>`:""}`;
+    host.appendChild(div);
+  });
+}
+function escapeHtml(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));}
+
+/* ===== Wissensabfrage (Schüleransicht, nur Ergebnisanzeige) ===== */
+function renderStudentQuizzes(){
+  const host=$("extQuizArea");if(!host)return;host.innerHTML="";
+  if(!extQuizList.length){host.innerHTML="<p><small>Zurzeit sind keine Quizze hinterlegt. Deine Lehrkraft ergänzt sie in Kürze.</small></p>";return;}
+  const store=current.extQuizzes||(current.extQuizzes={});
+  extQuizList.forEach(eq=>{
+    const done=store[eq.id];
+    const block=document.createElement("div");block.className="quiz-q";
+    const link = eq.type==="upload"
+      ? (eq._blobUrl ? `<a href="${eq._blobUrl}" target="_blank" rel="noopener">Quiz öffnen</a>` : "<small>Quiz-Datei zurzeit nicht verfügbar.</small>")
+      : `<a href="${eq.url}" target="_blank" rel="noopener">Quiz öffnen</a>`;
+    let inner=`<p><b>${escapeHtml(eq.title)}</b> &middot; ${link}</p>`;
+    if(done){
+      const pct=Math.round(done.score/done.total*100);
+      inner+=`<div class="notice">Dein Ergebnis (eingetragen am ${fmtDate(done.date)}): <b>${done.score} von ${done.total} (${pct} %)</b></div>`;
+    }else{
+      inner+=`<p><small>Noch nicht bewertet. Bearbeite das Quiz über den Link; du kannst es beliebig oft wiederholen. Deine Lehrkraft trägt das Ergebnis ein.</small></p>`;
+    }
+    block.innerHTML=inner;host.appendChild(block);
+  });
+}
+
+/* =====================================================================
+   AUSWERTUNGSLOGIK
+   ===================================================================== */
+function levelSelfScore(student,lv){
+  const objs=OBJECTIVES.filter(o=>o.lv===lv);
+  let sum=0;
+  objs.forEach(o=>{const r=RATINGS.find(x=>x.key===student.self[o.id]);sum+=r?r.val:0;});
+  return sum/objs.length;            // 0..1
+}
+function levelAchieved(student,lv){
+  // Ohne interne Quizze bestimmt die Selbsteinschätzung das erreichte Level.
+  return levelSelfScore(student,lv) >= 0.6;
+}
+function highestLevel(student){
+  let h=0;
+  for(let lv=1;lv<=3;lv++){ if(levelAchieved(student,lv)) h=lv; else break; }
+  return h;
+}
+function docQuality(student){
+  const n=student.entries.length;
+  const reach=Math.min(1,n/8);                       // Menge der Dokumentation
+  const full=n? student.entries.filter(e=>e.got&&e.unclear&&e.better).length/n : 0; // Reflexionstiefe
+  return reach*0.5 + full*0.5;                        // 0..1
+}
+function quizAverage(student){
+  const vals=[];
+  const ext=student.extQuizzes||{};
+  Object.keys(ext).forEach(id=>{const q=ext[id]; if(q&&q.total>0) vals.push(q.score/q.total);});
+  if(!vals.length) return null;
+  return vals.reduce((a,b)=>a+b,0)/vals.length;
+}
+function suggestGrade(student){
+  const lv=highestLevel(student);
+  const base = lv===3?1.0 : lv===2?2.0 : lv===1?3.0 : 4.5;
+  const qa = quizAverage(student);
+  const dq = docQuality(student);
+  // Qualität kombiniert (Wissen 60 %, Dokumentation/Reflexion 40 %)
+  const quality = (qa!==null? qa:0)*0.6 + dq*0.4;
+  const adj = (0.6 - quality)*0.8;                    // bessere Qualität -> bessere Note
+  let note = base + adj;
+  note = Math.max(1.0, Math.min(6.0, note));
+  return {note:note, rounded:Math.round(note), level:lv, quizAvg:qa, doc:dq};
+}
+function gradeColor(n){
+  if(n<=1.5)return"#2f7d4f";if(n<=2.5)return"#6c9a3f";if(n<=3.5)return"var(--accent)";
+  if(n<=4.5)return"#d99a2b";return"var(--r-kaum)";}
+
+/* =====================================================================
+   KLASSEN-DIAGRAMM (Balken je Lernziel)
+   ===================================================================== */
+async function getAllStudents(){
+  const keys=await sList("student_");
+  const list=[];
+  for(const k of keys){const d=await sGet(k);if(d)list.push(d);}
+  list.sort((a,b)=>a.num-b.num);
+  return list;
+}
+async function renderClassChart(hostId){
+  const host=$(hostId);host.innerHTML="<p><small>Lade Klassendaten ...</small></p>";
+  const students=await getAllStudents();
+  if(!students.length){host.innerHTML="<p><small>Noch keine Daten vorhanden.</small></p>";return;}
+  const totClass=Math.max(refSize, students.length);
+  host.innerHTML="";
+  [1,2,3].forEach(lv=>{
+    const h=document.createElement("div");h.className="level-head";
+    h.innerHTML=`<span class="level-badge lv${lv}">Level ${lv}</span><span class="level-note">${students.length} von ${totClass} Schüler/innen erfasst</span>`;
+    host.appendChild(h);
+    OBJECTIVES.filter(o=>o.lv===lv).forEach(o=>{
+      const counts={sicher:0,weit:0,lueck:0,kaum:0,leer:0};
+      students.forEach(s=>{const r=s.self[o.id];if(r&&counts[r]!==undefined)counts[r]++;else counts.leer++;});
+      const tot=totClass;
+      const row=document.createElement("div");row.className="bar-row";
+      const sicherPct=Math.round(counts.sicher/tot*100);
+      row.innerHTML=`<div class="bar-label"><span><span class="id">${o.id}</span> ${o.t.slice(0,70)}${o.t.length>70?"...":""}</span><span>${sicherPct}% sicher</span></div>
+        <div class="bar-track">
+          <div class="bar-seg seg-sicher" style="width:${counts.sicher/tot*100}%"></div>
+          <div class="bar-seg seg-weit" style="width:${counts.weit/tot*100}%"></div>
+          <div class="bar-seg seg-lueck" style="width:${counts.lueck/tot*100}%"></div>
+          <div class="bar-seg seg-kaum" style="width:${counts.kaum/tot*100}%"></div>
+        </div>`;
+      host.appendChild(row);
+    });
+  });
+}
+
+/* =====================================================================
+   LEHRERBEREICH
+   ===================================================================== */
+function tTab(name){
+  document.querySelectorAll("#screen-teacher .tabs button").forEach(b=>b.classList.toggle("active",b.dataset.ttab===name));
+  ["über","raster","quizkat","einstell"].forEach(t=>$("ttab-"+t).classList.toggle("hidden",t!==name));
+  if(name==="raster") renderClassChart("classChartTeacher");
+  if(name==="quizkat") renderQuizKat();
+}
+
+async function renderTeacher(){
+  await loadExtQuizList();
+  const students=await getAllStudents();
+  // KPIs
+  const kpi=$("teacherKpi");
+  const withData=students.filter(s=>Object.keys(s.self).length||s.entries.length||Object.keys(s.quizzes).length||Object.keys(s.extQuizzes||{}).length);
+  const avgGrade = withData.length? (withData.reduce((a,s)=>a+suggestGrade(s).note,0)/withData.length):0;
+  kpi.innerHTML=`
+    <div class="box"><b>${students.length}</b>erfasste Nummern</div>
+    <div class="box"><b>${withData.length}</b>aktiv dokumentiert</div>
+    <div class="box"><b>${avgGrade?avgGrade.toFixed(1):"-"}</b>Noten-Mittel (Vorschlag)</div>`;
+  // Tabelle
+  const tbl=$("teacherTable");
+  let html=`<thead><tr><th>Nr.</th><th>Höchstes Level</th><th>Quiz Ø</th><th>Einträge</th><th>Reflexion</th><th>Notenvorschlag</th></tr></thead><tbody>`;
+  if(!students.length){html+=`<tr><td colspan="6"><small>Noch keine Schüler angemeldet.</small></td></tr>`;}
+  students.forEach(s=>{
+    const g=suggestGrade(s);
+    const qa=g.quizAvg!==null?Math.round(g.quizAvg*100)+"%":"&ndash;";
+    const reflFull=s.entries.length?s.entries.filter(e=>e.got&&e.unclear&&e.better).length:0;
+    html+=`<tr class="clickable" onclick="showDetail(${s.num})">
+      <td><b>${s.num}</b></td>
+      <td>${g.level||"&ndash;"}</td>
+      <td>${qa}</td>
+      <td>${s.entries.length}</td>
+      <td>${reflFull}/${s.entries.length}</td>
+      <td><span class="grade-pill" style="background:${gradeColor(g.note)}">${g.note.toFixed(1)} (&asymp; ${g.rounded})</span></td>
+    </tr>`;
+  });
+  html+="</tbody>";tbl.innerHTML=html;
+  $("studentDetail").classList.add("hidden");
+}
+
+async function renderQuizKat(){
+  await loadExtQuizList();
+  const host=$("quizKatList");if(!host)return;
+  if(!extQuizList.length){host.innerHTML="<p><small>Noch keine Quizze angelegt.</small></p>";return;}
+  let html="<h3>Angelegte Quizze</h3>";
+  extQuizList.forEach(eq=>{
+    let info;
+    if(eq.type==="upload"){
+      const open = eq._blobUrl ? `<a href="${eq._blobUrl}" target="_blank" rel="noopener">Vorschau öffnen</a>` : "<span style='color:var(--r-kaum)'>Datei nicht gefunden</span>";
+      info=`<b>${escapeHtml(eq.title)}</b> <span class="pill">Hochgeladen</span><br><small>${escapeHtml(eq.filename||"Quiz-Datei")} &middot; ${open} &middot; max. ${eq.max}</small>`;
+    }else{
+      info=`<b>${escapeHtml(eq.title)}</b> <span class="pill">Link</span><br><small><a href="${eq.url}" target="_blank" rel="noopener">${escapeHtml(eq.url)}</a> &middot; max. ${eq.max}</small>`;
+    }
+    html+=`<div class="quiz-q" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <span>${info}</span>
+      <button class="btn-soft" onclick="deleteExtQuiz('${eq.id}')">Löschen</button>
+    </div>`;
+  });
+  host.innerHTML=html;
+}
+async function addExtQuiz(){
+  const title=$("nqTitle").value.trim();
+  let url=$("nqUrl").value.trim();
+  let max=parseInt($("nqMax").value,10);
+  if(!title){alert("Bitte eine Bezeichnung eingeben.");return;}
+  if(!url){alert("Bitte einen Link eingeben.");return;}
+  if(url.indexOf("http")!==0){url="https://"+url;}
+  if(!max||max<1)max=100;
+  await loadExtQuizList();
+  const id="q_"+Date.now().toString(36);
+  extQuizList.push({id:id,title:title,url:url,max:max});
+  await sSet("ext_quiz_list",extQuizList);
+  $("nqTitle").value="";$("nqUrl").value="";$("nqMax").value="100";
+  $("quizKatSaved").textContent="Quiz hinzugefügt.";
+  setTimeout(()=>$("quizKatSaved").textContent="",2000);
+  renderQuizKat();
+}
+async function uploadExtQuiz(){
+  const title=$("uqTitle").value.trim();
+  const fileInput=$("uqFile");
+  const file=fileInput.files&&fileInput.files[0];
+  let max=parseInt($("uqMax").value,10);
+  if(!title){alert("Bitte eine Bezeichnung eingeben.");return;}
+  if(!file){alert("Bitte eine HTML-Datei auswählen.");return;}
+  const name=(file.name||"").toLowerCase();
+  if(!(name.endsWith(".html")||name.endsWith(".htm"))){
+    alert("Bitte eine einzelne HTML-Datei (.html) auswählen.");return;
+  }
+  if(file.size>4*1024*1024){
+    alert("Die Datei ist zu groß (max. 4 MB). Bitte ein kleineres, in sich geschlossenes Quiz verwenden.");return;
+  }
+  if(!max||max<1)max=100;
+  let htmlContent;
+  try{ htmlContent=await readFileText(file); }
+  catch(e){ alert("Die Datei konnte nicht gelesen werden."); return; }
+  if(!htmlContent || !htmlContent.trim()){ alert("Die Datei ist leer."); return; }
+  await loadExtQuizList();
+  const id="q_"+Date.now().toString(36);
+  await sSet("ext_quiz_html_"+id, htmlContent);
+  extQuizList.push({id:id,title:title,type:"upload",filename:file.name,max:max});
+  await sSet("ext_quiz_list",extQuizList);
+  $("uqTitle").value=""; fileInput.value=""; $("uqMax").value="100";
+  $("quizUpSaved").textContent="Quiz hochgeladen und integriert.";
+  setTimeout(()=>$("quizUpSaved").textContent="",2500);
+  renderQuizKat();
+}
+async function deleteExtQuiz(id){
+  if(!confirm("Dieses Quiz aus dem Katalog entfernen? Bereits eingetragene Ergebnisse der Schüler/innen bleiben gespeichert."))return;
+  await loadExtQuizList();
+  const entry=extQuizList.find(q=>q.id===id);
+  extQuizList=extQuizList.filter(q=>q.id!==id);
+  await sSet("ext_quiz_list",extQuizList);
+  if(entry && entry.type==="upload"){ await sDel("ext_quiz_html_"+id); }
+  renderQuizKat();
+}
+async function saveTeacherQuiz(num,id,max){
+  const el=$("tq_"+num+"_"+id);if(!el)return;
+  let v=parseFloat(el.value);
+  if(isNaN(v)){alert("Bitte ein Ergebnis als Zahl eintragen.");return;}
+  if(v<0)v=0; if(v>max)v=max;
+  const s=await sGet("student_"+num);if(!s)return;
+  if(!s.extQuizzes)s.extQuizzes={};
+  s.extQuizzes[id]={score:v,total:max,date:todayISO()};
+  await sSet("student_"+num,s);
+  await renderTeacher();
+  showDetail(num);
+}
+async function clearTeacherQuiz(num,id){
+  const s=await sGet("student_"+num);if(!s)return;
+  if(s.extQuizzes)delete s.extQuizzes[id];
+  await sSet("student_"+num,s);
+  await renderTeacher();
+  showDetail(num);
+}
+
+async function showDetail(num){
+  const s=await sGet("student_"+num);
+  if(!s)return;
+  const g=suggestGrade(s);
+  const host=$("studentDetail");host.classList.remove("hidden");
+  const extStore=s.extQuizzes||{};
+  let extHtml="";
+  if(!extQuizList.length){
+    extHtml=`<p><small>Noch keine Quizze im Katalog. Legen Sie sie im Reiter &bdquo;Quiz-Katalog&ldquo; an.</small></p>`;
+  }else{
+    extQuizList.forEach(eq=>{
+      const q=extStore[eq.id];
+      const cur=q?q.score:"";
+      const info=q?`zuletzt am ${fmtDate(q.date)}`:"noch nicht bewertet";
+      extHtml+=`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0">
+        <span style="min-width:190px"><b>${escapeHtml(eq.title)}</b></span>
+        <input type="number" id="tq_${s.num}_${eq.id}" min="0" max="${eq.max}" step="1" value="${cur}" placeholder="0" style="width:90px">
+        <span>von ${eq.max}</span>
+        <button class="btn-primary" onclick="saveTeacherQuiz(${s.num},'${eq.id}',${eq.max})">Speichern</button>
+        ${q?`<button class="btn-soft" onclick="clearTeacherQuiz(${s.num},'${eq.id}')">Löschen</button>`:""}
+        <small style="color:var(--muted)">${info}</small>
+      </div>`;
+    });
+  }
+  let selfHtml="";
+  [1,2,3].forEach(lv=>{
+    selfHtml+=`<span class="pill">L${lv} Selbst: ${Math.round(levelSelfScore(s,lv)*100)}%</span>`;
+  });
+  let entriesHtml="";
+  if(s.entries.length){
+    [...s.entries].reverse().forEach(e=>{
+      const ids=e.objs&&e.objs.length?e.objs.map(i=>`<span class="pill">${i}</span>`).join(""):"<small>kein Lernziel</small>";
+      entriesHtml+=`<div class="entry"><div class="date">${fmtDate(e.date)} &middot; ${"\u2605".repeat(e.stars||0)}${e.mode?" &middot; "+e.mode:""}</div>
+        <div style="margin:6px 0">${ids}</div>
+        ${e.got?`<div><b>Verstanden:</b> ${escapeHtml(e.got)}</div>`:""}
+        ${e.unclear?`<div><b>Noch unklar:</b> ${escapeHtml(e.unclear)}</div>`:""}
+        ${e.better?`<div><b>Besser machen:</b> ${escapeHtml(e.better)}</div>`:""}</div>`;
+    });
+  }else entriesHtml="<p><small>Keine Tageseinträge.</small></p>";
+
+  host.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <h2 style="margin:0">Schüler/in Nr. ${s.num}</h2>
+      <button class="btn-soft" onclick="document.getElementById('studentDetail').classList.add('hidden')">Schließen</button>
+    </div>
+    <div class="kpi" style="margin-top:12px">
+      <div class="box"><b style="color:${gradeColor(g.note)}">${g.note.toFixed(1)}</b>Notenvorschlag (&asymp; ${g.rounded})</div>
+      <div class="box"><b>${g.level||"-"}</b>höchstes Level</div>
+      <div class="box"><b>${g.quizAvg!==null?Math.round(g.quizAvg*100)+"%":"-"}</b>Wissen Ø</div>
+      <div class="box"><b>${Math.round(g.doc*100)}%</b>Dokumentation</div>
+    </div>
+    <div style="margin-top:6px"><b>Quiz-Ergebnisse (manuell eintragen):</b>${extHtml}</div>
+    <p><b>Selbsteinschätzung je Level:</b><br>${selfHtml}</p>
+    <p style="font-size:.85rem;color:var(--muted)">Berechnung: Basis aus höchstem Level laut Selbsteinschätzung (L1&rarr;3,0 / L2&rarr;2,0 / L3&rarr;1,0), feinjustiert über die Quiz-Ergebnisse (60 %) und Dokumentation/Reflexion (40 %). Die endgültige Note legen Sie fest.</p>
+    <h3 style="margin-top:18px">Tagesdokumentation</h3>
+    ${entriesHtml}`;
+  host.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+async function saveSettings(){
+  const v=parseInt($("classSize").value,10);
+  if(!v||v<1||v>30){alert("Bitte für die Klassengröße eine Zahl zwischen 1 und 30 eingeben.");return;}
+  const r=parseInt($("refSize").value,10);
+  if(!r||r<1||r>v){alert("Bitte für die Bezugsgröße eine Zahl zwischen 1 und der Klassengröße ("+v+") eingeben.");return;}
+  classSize=v; refSize=r;
+  await sSet("class_config",{size:v,refSize:r});
+  $("sizeSaved").textContent="Gespeichert.";
+  setTimeout(()=>$("sizeSaved").textContent="",2000);
+}
+
+async function resetAll(){
+  if(!confirm("Wirklich ALLE Schülerdaten unwiderruflich löschen?"))return;
+  const keys=await sList("student_");
+  for(const k of keys) await sDel(k);
+  alert("Alle Schülerdaten wurden gelöscht.");
+  renderTeacher();
+}
+
+/* =====================================================================
+   DATENAUSTAUSCH (Export / Import ueber JSON-Dateien)
+   ===================================================================== */
+function flash(id,msg){
+  const el=$(id); if(!el) return;
+  el.textContent=msg;
+  setTimeout(()=>{ el.textContent=""; }, 3000);
+}
+function downloadJSON(filename,obj){
+  const blob=new Blob([JSON.stringify(obj,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download=filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+function normalizeStudent(d){
+  if(!d.self) d.self={};
+  if(!d.entries) d.entries=[];
+  if(!d.quizzes) d.quizzes={};
+  if(!d.extQuizzes) d.extQuizzes={};
+  d.num=parseInt(d.num,10);
+  return d;
+}
+async function exportStudent(){
+  if(!current){ alert("Bitte zuerst anmelden."); return; }
+  await sSet("student_"+current.num,current);
+  const filename="SOL_LF5_Schueler_"+current.num+".json";
+  const text=JSON.stringify(current,null,2);
+  // Bequemer Weg auf dem Handy: den Teilen-Dialog des Ger\u00e4ts mit der Datei
+  // \u00f6ffnen, sodass sie direkt in eine App wie die Schul-Cloud gelegt werden kann.
+  try{
+    if(navigator.canShare){
+      const file=new File([text],filename,{type:"application/json"});
+      if(navigator.canShare({files:[file]})){
+        await navigator.share({files:[file],title:filename});
+        flash("ownImportMsg","Datei geteilt. Bitte in den Abgabeordner legen.");
+        return;
+      }
+    }
+  }catch(e){
+    if(e && e.name==="AbortError"){ return; } // Nutzer/in hat abgebrochen
+    // sonst faellt es unten auf den normalen Download zur\u00fcck
+  }
+  downloadJSON(filename,current);
+  flash("ownImportMsg","Datei gespeichert. Bitte an die Lehrkraft abgeben.");
+}
+async function importOwnBackup(){
+  if(!current){ alert("Bitte zuerst anmelden."); return; }
+  const inp=$("importOwnFile");
+  if(!inp.files||!inp.files.length){ alert("Bitte zuerst eine Sicherungsdatei ausw\u00e4hlen."); return; }
+  let data;
+  try{ data=JSON.parse(await readFileText(inp.files[0])); }
+  catch(e){ alert("Die Datei konnte nicht gelesen werden."); return; }
+  if(typeof data.num==="undefined"){ alert("Die Datei sieht nicht wie eine g\u00fcltige Sicherung aus."); return; }
+  if(parseInt(data.num,10)!==current.num){
+    alert("Diese Sicherung geh\u00f6rt zu Nummer "+data.num+", angemeldet bist du als Nummer "+current.num+". Bitte die passende Datei w\u00e4hlen.");
+    return;
+  }
+  current=normalizeStudent(data);
+  await sSet("student_"+current.num,current);
+  inp.value="";
+  renderStudent();
+  flash("ownImportMsg","Sicherung geladen. Deine Eintr\u00e4ge sind wieder da.");
+}
+function looksLikeStudent(d){ return d && typeof d.num!=="undefined"; }
+async function ingestStudentObject(data){
+  if(!looksLikeStudent(data)) return false;
+  data=normalizeStudent(data);
+  await sSet("student_"+data.num,data);
+  return true;
+}
+async function importStudents(){
+  const inp=$("importStudentsFile");
+  if(!inp.files||!inp.files.length){ alert("Bitte zuerst Dateien ausw\u00e4hlen (JSON oder ZIP)."); return; }
+  let ok=0, fail=0, zipBlocked=false;
+  for(const f of inp.files){
+    const name=(f.name||"").toLowerCase();
+    const isZip = name.endsWith(".zip") || f.type==="application/zip" || f.type==="application/x-zip-compressed";
+    if(isZip){
+      if(typeof JSZip==="undefined"){ zipBlocked=true; continue; }
+      let zip;
+      try{ zip=await JSZip.loadAsync(f); }
+      catch(e){ fail++; continue; }
+      const entries=[];
+      zip.forEach((path,entry)=>{ if(!entry.dir && path.toLowerCase().endsWith(".json")) entries.push(entry); });
+      for(const entry of entries){
+        let data;
+        try{ data=JSON.parse(await entry.async("string")); }
+        catch(e){ fail++; continue; }
+        if(await ingestStudentObject(data)) ok++; else fail++;
+      }
+    } else {
+      let data;
+      try{ data=JSON.parse(await readFileText(f)); }
+      catch(e){ fail++; continue; }
+      if(await ingestStudentObject(data)) ok++; else fail++;
+    }
+  }
+  inp.value="";
+  await renderTeacher();
+  let msg="Import fertig. Erfolgreich: "+ok+(fail?(" / fehlerhaft: "+fail):"")+".";
+  if(zipBlocked) msg+=" Hinweis: Das ZIP konnte nicht entpackt werden (Entpacker nicht geladen, evtl. keine Internetverbindung). Bitte das Archiv manuell entpacken und die JSON-Dateien w\u00e4hlen.";
+  flash("teacherImportMsg",msg);
+}
+
+/* ===== Initialisierung ===== */
+loadConfig();
+if(!hasLS){
+  console.warn("Kein persistenter Speicher verfügbar. Daten bleiben nur innerhalb dieser Sitzung erhalten.");
+}
+</script>
